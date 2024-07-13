@@ -1,0 +1,5 @@
+This repo stores benchmarks for the project using LLM.
+
+As for the simple test folder, it only tests a function 'sizeof' in C language. To show the result, you can directly run the 'main' void in 'simple test/src/sizeofTest.java'. The expected result is, ignoring warning messages, it prints 'Size of MyObject instance: 32 bytes' twice. Actually, it calculates the size of a struct defined in both sizeOfTest.java and sizeof.c, in two different ways, one is using Unsafe as another is using FFM api.
+
+Note that there exists two problems for the simple test. One is, when using FFM api to calculate the size, I simply defined the same struct in sizeof.c, which is not a good solution. That means, as long as I change the struct in the java file, I should also change sizeof.c. Another problem is, in the struct, if we define ```char[] str``` in both files, the result looks good. However, if we use String instead, the result of java file and C file differs. A potential reason is the memory management method of the two languages have a little difference, as the exact reason is not clear yet.
