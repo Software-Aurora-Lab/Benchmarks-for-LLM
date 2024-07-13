@@ -63,7 +63,7 @@ public class sizeOfTest {
 
             // Get the offset using the linker
             Linker linker = Linker.nativeLinker();
-            SymbolLookup stdLib = SymbolLookup.libraryLookup("src/libsizeof.so", arena);
+            SymbolLookup stdLib = SymbolLookup.libraryLookup("simple test/src/libsizeof.so", arena);
             MemorySegment sizeof_addr = stdLib.find("sizeof_myobject").get();
             FunctionDescriptor offsetof_sig = FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS);
             MethodHandle offsetof = linker.downcallHandle(sizeof_addr, offsetof_sig);
