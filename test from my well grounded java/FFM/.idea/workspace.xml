@@ -5,49 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c656162c-f926-4806-8f6a-5afa6fd392ee" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Account.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/AtomicAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FFM.iml" beforeDir="false" afterPath="$PROJECT_DIR$/FFM.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FFMmain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SynchronizedAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/VHAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/ExamplePrivate$Proxy.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/ExamplePrivate.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/FFM.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/HiddenExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/MHExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/FFM/ch15/ReflectionExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/Account.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/AtomicAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/SynchronizedAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/Unsafemain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/VHAccount.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/Account.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/AtomicAccount.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/Concat.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/ExamplePrivate$Proxy.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/ExamplePrivate.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/HiddenExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/MHExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/ReflectionExamples.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/SynchronizedAccount.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/Unsafemain.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/VHAccount.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/out/production/unsafe/ch15/unsafe.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../unsafe/unsafe.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,30 +45,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.FFMmain.executor": "Run",
-    "Downloaded.Files.Path.Enabled": "false",
-    "JUnit.AtomicAccountTest.executor": "Run",
-    "JUnit.SynchronizedAccountTest.executor": "Run",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "create.test.in.the.same.root": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.FFMmain.executor&quot;: &quot;Run&quot;,
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;JUnit.AtomicAccountTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.SynchronizedAccountTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VHAccountTest.executor&quot;: &quot;Run&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;create.test.in.the.same.root&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateTestDialog.Recents.Supers">
       <recent name="" />
@@ -204,7 +163,8 @@
       <option name="presentableId" value="Default" />
       <updated>1721518328922</updated>
       <workItem from="1721518329966" duration="299000" />
-      <workItem from="1721518644961" duration="1084000" />
+      <workItem from="1721518644961" duration="1314000" />
+      <workItem from="1721932582222" duration="308000" />
     </task>
     <servers />
   </component>
