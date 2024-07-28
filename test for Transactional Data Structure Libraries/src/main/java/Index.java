@@ -30,13 +30,11 @@
 
 import sun.misc.Unsafe;
 
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.util.Random;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemoryLayout.PathElement;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
@@ -76,7 +74,6 @@ public class Index {
     private static final VarHandle HEAD_DOWN_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("down"));
     private static final VarHandle HEAD_LEVEL_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("level"));
 
-
     static {
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
@@ -89,6 +86,32 @@ public class Index {
             throw new Error(e);
         }
     }
+
+    private static boolean compareAndSwapObject(Object obj, long offset, Object expect, Object update) {
+        try (Arena arena = Arena.ofConfined()) {
+            Linker linker = Linker.nativeLinker();
+            SymbolLookup casLib = SymbolLookup.libraryLookup("test for Transactional Data Structure Libraries/src/lib/libcas.so", arena);
+            MemorySegment cas_addr = casLib.find("Java_com_example_CAS_compareAndSwapObject").get();
+
+            // Function descriptor for compareAndSwapObject
+            FunctionDescriptor cas_sig = FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN,
+                    ValueLayout.ADDRESS,
+                    ValueLayout.JAVA_LONG,
+                    ValueLayout.ADDRESS,
+                    ValueLayout.ADDRESS);
+
+            // Method handle for the compareAndSwapObject function
+            MethodHandle cas = linker.downcallHandle(cas_addr, cas_sig);
+
+            // Call the native compareAndSwapObject function
+            return (boolean) cas.invokeExact(obj, offset, expect, update);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+
+
+
 
     /**
      * The topmost head index of the skiplist.
@@ -107,7 +130,7 @@ public class Index {
      * compareAndSet head node
      */
     private boolean casHead(HeadIndex cmp, HeadIndex val) {
-        return UNSAFE.compareAndSwapObject(this, headOffset, cmp, val);
+        return compareAndSwapObject(this, headOffset, cmp, val);
     }
 
     /**
