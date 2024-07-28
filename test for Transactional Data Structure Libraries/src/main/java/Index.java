@@ -1,42 +1,6 @@
-/*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License version 2 for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
-/*
- * This file is available under and governed by the GNU General Public
- * License version 2 only, as published by the Free Software Foundation.
- * However, the following notice accompanied the original version of this
- * file:
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/licenses/publicdomain
- */
-
-import sun.misc.Unsafe;
-
-import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.util.Random;
-import java.lang.foreign.MemoryLayout.PathElement;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class Index {
 
@@ -44,79 +8,31 @@ public class Index {
      * Special value used to identify base-level header
      */
     private static final Object BASE_HEADER = new Object();
-    /**
-     * Unsafe mechanics
-     */
-    private static final Unsafe UNSAFE;
-    private static final long headOffset;
-    private static final Arena ARENA = Arena.ofConfined();
 
-    // Define memory layouts for IndexNode and HeadIndex
-    private static final MemoryLayout INDEX_NODE_LAYOUT = MemoryLayout.structLayout(
-            ValueLayout.ADDRESS.withName("node"),
-            ValueLayout.ADDRESS.withName("down"),
-            ValueLayout.ADDRESS.withName("right")
-    );
-
-    private static final MemoryLayout HEAD_INDEX_LAYOUT = MemoryLayout.structLayout(
-            ValueLayout.ADDRESS.withName("node"),
-            ValueLayout.ADDRESS.withName("down"),
-            ValueLayout.ADDRESS.withName("right"),
-            ValueLayout.JAVA_INT.withName("level")
-    );
-
-    // Define VarHandles for IndexNode
-    private static final VarHandle INDEX_NODE_RIGHT_HANDLE = INDEX_NODE_LAYOUT.varHandle(PathElement.groupElement("right"));
-
-    // Define VarHandles for HeadIndex
-    private static final VarHandle HEAD_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("node"));
-    private static final VarHandle HEAD_RIGHT_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("right"));
-    private static final VarHandle HEAD_DOWN_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("down"));
-    private static final VarHandle HEAD_LEVEL_HANDLE = HEAD_INDEX_LAYOUT.varHandle(PathElement.groupElement("level"));
-
-    static {
-        try {
-            Field f = Unsafe.class.getDeclaredField("theUnsafe");
-            f.setAccessible(true);
-            UNSAFE = (Unsafe) f.get(null);
-            Class<?> k = Index.class;
-            headOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("head"));
-        } catch (Exception e) {
-            throw new Error(e);
-        }
+    @Override
+    public String toString() {
+        return "Index{" +
+                "head=" + head +
+                '}';
     }
 
-    private static boolean compareAndSwapObject(Object obj, long offset, Object expect, Object update) {
-        try (Arena arena = Arena.ofConfined()) {
-            Linker linker = Linker.nativeLinker();
-            SymbolLookup casLib = SymbolLookup.libraryLookup("test for Transactional Data Structure Libraries/src/lib/libcas.so", arena);
-            MemorySegment cas_addr = casLib.find("Java_com_example_CAS_compareAndSwapObject").get();
-
-            // Function descriptor for compareAndSwapObject
-            FunctionDescriptor cas_sig = FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.JAVA_LONG,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS);
-
-            // Method handle for the compareAndSwapObject function
-            MethodHandle cas = linker.downcallHandle(cas_addr, cas_sig);
-
-            // Call the native compareAndSwapObject function
-            return (boolean) cas.invokeExact(obj, offset, expect, update);
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
+    public static Index fromString(String s) {
+        // Parse the string to construct an Index instance
+        // For simplicity, we assume the format is consistent with toString()
+        String headString = s.substring(s.indexOf("head=") + 5, s.length() - 1);
+        HeadIndex headIndex = HeadIndex.fromString(headString);
+        Index index = new Index(new LNode());
+        index.head = headIndex;
+        return index;
     }
-
-
-
 
     /**
      * The topmost head index of the skiplist.
      */
     private volatile HeadIndex head;
+
+    private static final AtomicReferenceFieldUpdater<Index, HeadIndex> headUpdater =
+            AtomicReferenceFieldUpdater.newUpdater(Index.class, HeadIndex.class, "head");
 
     /**
      * Constructor
@@ -130,7 +46,7 @@ public class Index {
      * compareAndSet head node
      */
     private boolean casHead(HeadIndex cmp, HeadIndex val) {
-        return compareAndSwapObject(this, headOffset, cmp, val);
+        return headUpdater.compareAndSet(this, cmp, val);
     }
 
     /**
@@ -326,95 +242,56 @@ public class Index {
             x ^= x << 13;
             x ^= x >>> 17;
             randomSeed = x ^= x << 5;
-            if (x == 0)
-                randomSeed = x = 1; // avoid zero
             return x;
         }
     }
+}
 
-    /**
-     * Index nodes represent the levels of the skip list.
-     */
-    static class IndexNode {
-        /**
-         * Unsafe mechanics
-         */
-        private static final Unsafe UNSAFE;
-        private static final long rightOffset;
+class IndexNode {
+    final LNode node;
+    volatile IndexNode down;
+    volatile IndexNode right;
 
-        static {
-            try {
+    private static final AtomicReferenceFieldUpdater<IndexNode, IndexNode> rightUpdater =
+            AtomicReferenceFieldUpdater.newUpdater(IndexNode.class, IndexNode.class, "right");
 
-                Field f = Unsafe.class.getDeclaredField("theUnsafe");
-                f.setAccessible(true);
-                UNSAFE = (Unsafe) f.get(null);
-                Class<?> k = IndexNode.class;
-                rightOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("right"));
-            } catch (Exception e) {
-                throw new Error(e);
-            }
-        }
-
-        final LNode node;
-        final IndexNode down;
-        volatile IndexNode right;
-
-        /**
-         * Creates index node with given values.
-         */
-        IndexNode(LNode node, IndexNode down, IndexNode right) {
-            this.node = node;
-            this.down = down;
-            this.right = right;
-        }
-
-        /**
-         * compareAndSet right field
-         */
-        final boolean casRight(IndexNode cmp, IndexNode val) {
-            return UNSAFE.compareAndSwapObject(this, rightOffset, cmp, val);
-        }
-
-        /**
-         * Tries to CAS newSucc as successor.  To minimize races with
-         * unlink that may lose this index node, if the node being
-         * indexed is known to be deleted, it doesn't try to link in.
-         *
-         * @param succ    the expected current successor
-         * @param newSucc the new successor
-         * @return true if successful
-         */
-        final boolean link(IndexNode succ, IndexNode newSucc) {
-            LNode n = node;
-            newSucc.right = succ;
-            return n.val != null && casRight(succ, newSucc);
-        }
-
-        /**
-         * Tries to CAS right field to skip over apparent successor
-         * succ.  Fails (forcing a retraversal by caller) if this node
-         * is known to be deleted.
-         *
-         * @param succ the expected current successor
-         * @return true if successful
-         */
-        final boolean unlink(IndexNode succ) {
-            return node.val != null && casRight(succ, succ.right);
-        }
-
+    IndexNode(LNode node, IndexNode down, IndexNode right) {
+        this.node = node;
+        this.down = down;
+        this.right = right;
     }
 
-    /**
-     * Nodes heading each level keep track of their level.
-     */
-    static final class HeadIndex extends IndexNode {
-        final int level;
+    boolean link(IndexNode succ, IndexNode newSucc) {
+        newSucc.right = succ;
+        return rightUpdater.compareAndSet(this, succ, newSucc);
+    }
 
-        HeadIndex(LNode node, IndexNode down, IndexNode right, int level) {
-            super(node, down, right);
-            this.level = level;
-        }
+    boolean unlink(IndexNode succ) {
+        return rightUpdater.compareAndSet(this, succ, succ.right);
+    }
+}
+
+class HeadIndex extends IndexNode {
+    final int level;
+
+    HeadIndex(LNode node, IndexNode down, IndexNode right, int level) {
+        super(node, down, right);
+        this.level = level;
+    }
+
+    public String toString() {
+        return "HeadIndex{" +
+                "level=" + level +
+                ", down=" + down +
+                ", right=" + right +
+                '}';
+    }
+
+    public static HeadIndex fromString(String s) {
+        // Implement the logic to parse a HeadIndex from its string representation
+        // This will likely involve parsing the level, down, and right components
+        // For simplicity, this example doesn't include the parsing logic
+        return new HeadIndex(new LNode(), null, null, 1); // Placeholder implementation
     }
 
 }

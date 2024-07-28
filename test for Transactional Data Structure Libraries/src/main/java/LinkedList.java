@@ -1,35 +1,8 @@
-import sun.misc.Unsafe;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 public class LinkedList {
-
-    private static Unsafe unsafe = null;
-
-    static {
-        Field f = null;
-        try {
-            f = Unsafe.class.getDeclaredField("theUnsafe");
-        } catch (NoSuchFieldException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        f.setAccessible(true);
-        try {
-            unsafe = (Unsafe) f.get(null);
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
     protected LNode head = new LNode(); // protected (not private) for testing
     protected Index index;
@@ -136,9 +109,7 @@ public class LinkedList {
             TXLibExceptions excep = new TXLibExceptions();
             throw excep.new AbortException();
         }
-        unsafe.loadFence();
         LNode next = n.next;
-        unsafe.loadFence();
         if (n.isLocked() || n.getVersion() > localStorage.readVersion) {
             // abort TX
             localStorage.TX = false;
@@ -171,9 +142,7 @@ public class LinkedList {
             if (pred.isLocked()) {
                 continue;
             }
-            unsafe.loadFence();
             next = pred.next; // TODO maybe this is not necessary
-            unsafe.loadFence();
             if (pred.isLockedOrDeleted()) {
                 continue;
             }
@@ -233,7 +202,6 @@ public class LinkedList {
                     startOver = true;
                     break;
                 }
-                unsafe.loadFence();
                 pred = pred.next;
                 if (pred == null) {
                     // next was not null but now perd.next is null
@@ -242,7 +210,6 @@ public class LinkedList {
                     break;
                 }
                 next = pred.next;
-                unsafe.loadFence();
                 if (pred.isLockedOrDeleted()) {
                     startOver = true;
                     break;
@@ -365,9 +332,7 @@ public class LinkedList {
             if (pred.isLocked()) {
                 continue;
             }
-            unsafe.loadFence();
             next = pred.next; // TODO maybe this is not necessary
-            unsafe.loadFence();
             if (pred.isLockedOrDeleted()) {
                 continue;
             }
@@ -417,7 +382,6 @@ public class LinkedList {
                     startOver = true;
                     break;
                 }
-                unsafe.loadFence();
                 pred = pred.next;
                 if (pred == null) {
                     // next was not null but now perd.next is null
@@ -426,7 +390,6 @@ public class LinkedList {
                     break;
                 }
                 next = pred.next;
-                unsafe.loadFence();
                 if (pred.isLockedOrDeleted()) {
                     startOver = true;
                     break;
@@ -528,9 +491,7 @@ public class LinkedList {
             if (pred.isLocked()) {
                 continue;
             }
-            unsafe.loadFence();
             next = pred.next;
-            unsafe.loadFence();
             if (pred.isLockedOrDeleted()) {
                 continue;
             }
@@ -549,7 +510,6 @@ public class LinkedList {
                         startOver = true;
                         break;
                     }
-                    unsafe.loadFence();
                     pred = pred.next;
                     if (pred == null) {
                         // next was not null but now perd.next is null
@@ -558,7 +518,6 @@ public class LinkedList {
                         break;
                     }
                     next = pred.next;
-                    unsafe.loadFence();
                     if (pred.isLockedOrDeleted()) {
                         startOver = true;
                         break;
@@ -718,9 +677,7 @@ public class LinkedList {
                 startOver = true;
                 continue;
             }
-            unsafe.loadFence();
             next = pred.next;
-            unsafe.loadFence();
             if (pred.isLockedOrDeleted()) {
                 startOver = true;
                 continue;
@@ -814,9 +771,7 @@ public class LinkedList {
                 startOver = true;
                 continue;
             }
-            unsafe.loadFence();
             next = pred.next;
-            unsafe.loadFence();
             if (pred.isLockedOrDeleted()) {
                 startOver = true;
                 continue;

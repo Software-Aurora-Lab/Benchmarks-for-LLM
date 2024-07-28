@@ -1,4 +1,6 @@
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LNode {
     private static final long lockMask = 0x1000000000000000L;
@@ -8,11 +10,6 @@ public class LNode {
     protected LNode next = null;
     protected Integer key = null; // TODO use templates
     protected Object val = null; // TODO maybe use templates
-    // bit 60 is lock
-    // bit 61 is deleted
-    // bit 62 is singleton
-    // 0 is false, 1 is true
-    // we are missing a bit because this is signed
     private AtomicLong versionAndFlags = new AtomicLong();
 
     protected boolean tryLock() {
@@ -153,4 +150,38 @@ public class LNode {
         versionAndFlags.set(l);
     }
 
+    @Override
+    public String toString() {
+        return "LNode{" +
+                "key=" + key +
+                ", val=" + val +
+                ", next=" + next +
+                ", versionAndFlags=0x" + Long.toHexString(versionAndFlags.get()) +
+                '}';
+    }
+
+    public static LNode fromString(String s) {
+        Pattern pattern = Pattern.compile(
+                "LNode\\{" +
+                        "key=(\\d+), " +
+                        "val=([^,]*), " +
+                        "next=([^,]*), " +
+                        "versionAndFlags=0x([0-9a-fA-F]+)" +
+                        "\\}"
+        );
+        Matcher matcher = pattern.matcher(s);
+
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid string format");
+        }
+
+        LNode node = new LNode();
+
+        node.key = Integer.parseInt(matcher.group(1));
+        node.val = "null".equals(matcher.group(2)) ? null : matcher.group(2);
+        node.next = "null".equals(matcher.group(3)) ? null : LNode.fromString(matcher.group(3));
+        node.versionAndFlags.set(Long.parseLong(matcher.group(4), 16));
+
+        return node;
+    }
 }
