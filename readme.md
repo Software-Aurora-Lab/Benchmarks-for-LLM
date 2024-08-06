@@ -33,3 +33,7 @@ Here I do not consider pointers, because they are typically not supported in Jav
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |                 struct with functions in it                  | It's not able to allocate memory for a function, as shown in the 'test for Transactional Data Structure Libraries' folder. |
 | use Unsafe to get the value at specified address of a struct | For example, there is a struct `ptr` contains an int variable and a string. If you use this struct by visit specified address using `UNSAFE.compareAndSwapObject(xxx, 3, xxx, xxx)`which means you need the 5th value in the memory of the struct, you can not use FFM to replace it. |
+
+-----------------------
+
+FFM is not about manipulating Java objects (except, perhaps primitive arrays) - it's about manipulating C structs and unions. If you are indeed after manipulating Java objects, you should not look at FFM, but at the plain VarHandle API. This JEP describes the various recommened replacements for each methods in Unsafe： https://openjdk.org/jeps/471
