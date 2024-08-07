@@ -1,4 +1,62 @@
 -------------------------------------------------------------------------------
 Test set: com.esotericsoftware.kryo.SerializationCompatTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.206 s -- in com.esotericsoftware.kryo.SerializationCompatTest
+Tests run: 3, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.093 s <<< FAILURE! -- in com.esotericsoftware.kryo.SerializationCompatTest
+com.esotericsoftware.kryo.SerializationCompatTest.testByteBuffer -- Time elapsed: 0.047 s <<< ERROR!
+com.esotericsoftware.kryo.KryoException: 
+java.lang.ArrayIndexOutOfBoundsException: Index 16 out of bounds for length 1
+Serialization trace:
+_bigInteger (com.esotericsoftware.kryo.SerializationCompatTestData$TestData)
+	at com.esotericsoftware.kryo.serializers.ReflectField.read(ReflectField.java:146)
+	at com.esotericsoftware.kryo.serializers.FieldSerializer.read(FieldSerializer.java:130)
+	at com.esotericsoftware.kryo.Kryo.readClassAndObject(Kryo.java:877)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTripWithBufferFactory(KryoTestCase.java:218)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:144)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:88)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:80)
+	at com.esotericsoftware.kryo.SerializationCompatTest.readAndRunTest(SerializationCompatTest.java:204)
+	at com.esotericsoftware.kryo.SerializationCompatTest.runTest(SerializationCompatTest.java:176)
+	at com.esotericsoftware.kryo.SerializationCompatTest.runTests(SerializationCompatTest.java:161)
+	at com.esotericsoftware.kryo.SerializationCompatTest.testByteBuffer(SerializationCompatTest.java:146)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 16 out of bounds for length 1
+	at com.esotericsoftware.kryo.unsafe.UnsafeInput.readBytes(UnsafeInput.java:204)
+	at com.esotericsoftware.kryo.unsafe.UnsafeInput.readBytes(UnsafeInput.java:187)
+	at com.esotericsoftware.kryo.io.Input.readBytes(Input.java:352)
+	at com.esotericsoftware.kryo.serializers.DefaultSerializers$BigIntegerSerializer.read(DefaultSerializers.java:206)
+	at com.esotericsoftware.kryo.serializers.DefaultSerializers$BigIntegerSerializer.read(DefaultSerializers.java:181)
+	at com.esotericsoftware.kryo.Kryo.readObject(Kryo.java:796)
+	at com.esotericsoftware.kryo.serializers.ReflectField.read(ReflectField.java:124)
+	... 13 more
+
+com.esotericsoftware.kryo.SerializationCompatTest.testStandard -- Time elapsed: 0.013 s <<< ERROR!
+com.esotericsoftware.kryo.KryoException: 
+java.lang.ArrayIndexOutOfBoundsException: Index 16 out of bounds for length 1
+Serialization trace:
+_bigInteger (com.esotericsoftware.kryo.SerializationCompatTestData$TestData)
+	at com.esotericsoftware.kryo.serializers.ReflectField.read(ReflectField.java:146)
+	at com.esotericsoftware.kryo.serializers.FieldSerializer.read(FieldSerializer.java:130)
+	at com.esotericsoftware.kryo.Kryo.readClassAndObject(Kryo.java:877)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTripWithBufferFactory(KryoTestCase.java:218)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:144)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:88)
+	at com.esotericsoftware.kryo.KryoTestCase.roundTrip(KryoTestCase.java:80)
+	at com.esotericsoftware.kryo.SerializationCompatTest.readAndRunTest(SerializationCompatTest.java:204)
+	at com.esotericsoftware.kryo.SerializationCompatTest.runTest(SerializationCompatTest.java:176)
+	at com.esotericsoftware.kryo.SerializationCompatTest.runTests(SerializationCompatTest.java:161)
+	at com.esotericsoftware.kryo.SerializationCompatTest.testStandard(SerializationCompatTest.java:133)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 16 out of bounds for length 1
+	at com.esotericsoftware.kryo.unsafe.UnsafeInput.readBytes(UnsafeInput.java:204)
+	at com.esotericsoftware.kryo.unsafe.UnsafeInput.readBytes(UnsafeInput.java:187)
+	at com.esotericsoftware.kryo.io.Input.readBytes(Input.java:352)
+	at com.esotericsoftware.kryo.serializers.DefaultSerializers$BigIntegerSerializer.read(DefaultSerializers.java:206)
+	at com.esotericsoftware.kryo.serializers.DefaultSerializers$BigIntegerSerializer.read(DefaultSerializers.java:181)
+	at com.esotericsoftware.kryo.Kryo.readObject(Kryo.java:796)
+	at com.esotericsoftware.kryo.serializers.ReflectField.read(ReflectField.java:124)
+	... 13 more
+

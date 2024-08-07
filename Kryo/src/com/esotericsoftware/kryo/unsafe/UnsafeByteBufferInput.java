@@ -1,15 +1,15 @@
 /* Copyright (c) 2008-2023, Nathan Sweet
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
  * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
  * disclaimer in the documentation and/or other materials provided with the distribution.
  * - Neither the name of Esoteric Software nor the names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
  * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -26,15 +26,9 @@ import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.util.Util;
 
 import java.io.InputStream;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.sql.SQLOutput;
-import java.util.Arrays;
 
-import jdk.jfr.MemoryAddress;
 import sun.nio.ch.DirectBuffer;
 
 /** A {@link ByteBufferInput} that reads data from direct ByteBuffer (off-heap memory) using sun.misc.Unsafe. Multi-byte primitive
@@ -191,13 +185,15 @@ public class UnsafeByteBufferInput extends ByteBufferInput {
 	}
 
 	public int[] readInts (int length) throws KryoException {
-		length = (int) Math.min(intArrayLength, length);
-		return intBuffer.asSlice(0, ValueLayout.JAVA_INT.byteSize() * length).toArray(ValueLayout.JAVA_INT);
+		int[] array = new int[length];
+		readBytes(array, intArrayBaseOffset, length << 2);
+		return array;
 	}
 
-	public long[] readLongs(int length) throws KryoException {
-		length = (int) Math.min(longArrayLength, length);
-		return Arrays.copyOfRange(longBuffer.toArray(ValueLayout.JAVA_LONG), 0, length);
+	public long[] readLongs (int length) throws KryoException {
+		long[] array = new long[length];
+		readBytes(array, longArrayBaseOffset, length << 3);
+		return array;
 	}
 
 	public float[] readFloats (int length) throws KryoException {

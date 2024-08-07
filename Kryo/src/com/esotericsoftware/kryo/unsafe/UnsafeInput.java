@@ -1,15 +1,15 @@
 /* Copyright (c) 2008-2023, Nathan Sweet
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
  * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
  * disclaimer in the documentation and/or other materials provided with the distribution.
  * - Neither the name of Esoteric Software nor the names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
  * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -26,8 +26,12 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.util.Util;
 
 import java.io.InputStream;
-import java.lang.foreign.ValueLayout;
-import java.util.Arrays;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteBuffer;
+
+import java.lang.foreign.*;
+import java.util.Objects;
 
 /** An {@link Input} that reads data from a byte[] using sun.misc.Unsafe. Multi-byte primitive types use native byte order, so the
  * native byte order on different computers which read and write the data must be the same.
@@ -144,8 +148,9 @@ public class UnsafeInput extends Input {
 	}
 
 	public long[] readLongs (int length) throws KryoException {
-		length = (int) Math.min(longArrayLength, length);
-		return Arrays.copyOfRange(longBuffer.toArray(ValueLayout.JAVA_LONG), 0, length);
+		long[] array = new long[length];
+		readBytes(array, longArrayBaseOffset, length << 3);
+		return array;
 	}
 
 	public float[] readFloats (int length) throws KryoException {
@@ -184,15 +189,57 @@ public class UnsafeInput extends Input {
 
 	/** Read count bytes and write them to the object at the given offset inside the in-memory representation of the object. */
 	public void readBytes (Object to, long offset, int count) throws KryoException {
+		Objects.requireNonNull(to);
+		Class<?> arrayClass = to.getClass().getComponentType();
+		if (arrayClass == null) {
+			throw new KryoException("Target is not an array");
+		}
 		int copyCount = Math.min(limit - position, count);
 		while (true) {
-			unsafe.copyMemory(buffer, byteArrayBaseOffset + position, to, offset, copyCount);
+			// Originally, unsafe copies buffer[byteArrayBaseOffset + position, ] to to[offset, ] by copyCound in bytes
+//			unsafe.copyMemory(buffer, byteArrayBaseOffset + position, to, offset, copyCount);
+			for (int i = 0; i < copyCount; i++) {
+				byte value = buffer[position + i];
+				if (arrayClass == byte.class) {
+					((byte[]) to)[(int) offset + i] = value;
+				} else if (arrayClass == short.class) {
+					short shortValue = (short) (value & 0xFF);
+					varHandle(short[].class).set(to, (int) offset + i, shortValue);
+				} else if (arrayClass == int.class) {
+					int intValue = value & 0xFF;
+					varHandle(int[].class).set(to, (int) offset + i, intValue);
+				} else if (arrayClass == long.class) {
+					long longValue = value & 0xFF;
+					varHandle(long[].class).set(to, (int) offset + i, longValue);
+				} else if (arrayClass == float.class) {
+					float floatValue = value & 0xFF;
+					varHandle(float[].class).set(to, (int) offset + i, floatValue);
+				} else if (arrayClass == double.class) {
+					double doubleValue = value & 0xFF;
+					varHandle(double[].class).set(to, (int) offset + i, doubleValue);
+				} else if (arrayClass == char.class) {
+					char charValue = (char) (value & 0xFF);
+					varHandle(char[].class).set(to, (int) offset + i, charValue);
+				} else if (arrayClass == boolean.class) {
+					boolean booleanValue = value != 0;
+					varHandle(boolean[].class).set(to, (int) offset + i, booleanValue);
+				} else {
+					throw new KryoException("Unsupported array type: " + arrayClass);
+				}
+			}
 			position += copyCount;
 			count -= copyCount;
 			if (count == 0) break;
 			offset += copyCount;
 			copyCount = Math.min(count, capacity);
 			require(copyCount);
+		}
+	}
+	private static VarHandle varHandle(Class<?> arrayClass) {
+		try {
+			return MethodHandles.arrayElementVarHandle(arrayClass);
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to obtain VarHandle for " + arrayClass, e);
 		}
 	}
 }

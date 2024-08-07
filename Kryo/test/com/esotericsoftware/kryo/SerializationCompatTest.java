@@ -229,7 +229,7 @@ class SerializationCompatTest extends KryoTestCase {
 	}
 
 	private static class TestDataDescription<T extends TestData> {
-		T testData;
+		final T testData;
 		final int length;
 		final int noGenericsLength;
 

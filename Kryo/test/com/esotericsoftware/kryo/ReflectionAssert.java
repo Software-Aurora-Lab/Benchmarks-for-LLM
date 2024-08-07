@@ -150,7 +150,7 @@ class ReflectionAssert {
 
 		Class clazz = one.getClass();
 		if (hasCustomEquals(clazz)) {
-//			assertEquals(one, another, "Values not equals for path '" + (StringUtils.isEmpty(path) ? "." : path) + "' - ");
+			assertEquals(one, another, "Values not equals for path '" + (StringUtils.isEmpty(path) ? "." : path) + "' - ");
 			return;
 		}
 			

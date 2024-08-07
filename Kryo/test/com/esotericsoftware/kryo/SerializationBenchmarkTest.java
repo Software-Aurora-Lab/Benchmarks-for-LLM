@@ -181,7 +181,7 @@ class SerializationBenchmarkTest extends KryoTestCase {
 			duration = TimeUnit.NANOSECONDS.toMillis(duration);
 
 			// Check that unmarshalled object is equal to original one (should never fail).
-//			if (!object.equals(object2)) throw new RuntimeException("Unmarshalled object is not equal to original object.");
+			if (!object.equals(object2)) throw new RuntimeException("Unmarshalled object is not equal to original object.");
 
 			if (print) System.out.format("%s (run %d): %,d ms\n", name, i + 1, duration);
 			average += duration;

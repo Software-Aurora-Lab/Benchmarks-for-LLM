@@ -1,4 +1,0 @@
-package com.esotericsoftware.kryo.benchmarks.jmh_generated;
-public class FieldSerializerBenchmark_CompatibleState_jmhType extends FieldSerializerBenchmark_CompatibleState_jmhType_B3 {
-}
-
