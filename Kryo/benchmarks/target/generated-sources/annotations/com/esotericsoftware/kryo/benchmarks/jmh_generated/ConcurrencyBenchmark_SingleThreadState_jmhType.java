@@ -1,0 +1,4 @@
+package com.esotericsoftware.kryo.benchmarks.jmh_generated;
+public class ConcurrencyBenchmark_SingleThreadState_jmhType extends ConcurrencyBenchmark_SingleThreadState_jmhType_B3 {
+}
+

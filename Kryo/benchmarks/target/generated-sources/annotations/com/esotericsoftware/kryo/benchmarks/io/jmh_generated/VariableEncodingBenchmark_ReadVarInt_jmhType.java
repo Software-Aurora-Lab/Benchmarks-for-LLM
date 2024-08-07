@@ -1,0 +1,4 @@
+package com.esotericsoftware.kryo.benchmarks.io.jmh_generated;
+public class VariableEncodingBenchmark_ReadVarInt_jmhType extends VariableEncodingBenchmark_ReadVarInt_jmhType_B3 {
+}
+

@@ -1,14 +1,15 @@
 /* Copyright (c) 2008-2023, Nathan Sweet
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and/or other materials provided with the distribution.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
  * - Neither the name of Esoteric Software nor the names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
  * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -16,151 +17,172 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
- package com.esotericsoftware.kryo.unsafe;
+package com.esotericsoftware.kryo.unsafe;
 
- import static com.esotericsoftware.minlog.Log.*;
- 
- import com.esotericsoftware.kryo.KryoException;
- import com.esotericsoftware.kryo.util.Util;
- 
- import java.lang.invoke.MethodHandles;
- import java.lang.invoke.VarHandle;
- import java.lang.reflect.Constructor;
- import java.lang.reflect.Method;
- import java.nio.ByteBuffer;
- import java.nio.ByteOrder;
+import static com.esotericsoftware.minlog.Log.*;
 
- import sun.misc.Unsafe;
- import java.lang.reflect.Field;
- 
- import sun.nio.ch.DirectBuffer;
- 
- /** Utility methods for using {@link VarHandle}.
-  * <p>
-  * Not available on all JVMs. {@link Util#unsafe} can be checked before using this class.
-  */
- public class UnsafeUtil {
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.util.Util;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+
+import sun.misc.Unsafe;
+import sun.nio.ch.DirectBuffer;
+
+/** Utility methods for using {@link sun.misc.Unsafe}.
+ * <p>
+ * Not available on all JVMs. {@link Util#unsafe} can be checked before using this class.
+ * @author Roman Levenstein <romixlev@gmail.com> */
+@SuppressWarnings("restriction")
+public class UnsafeUtil {
+	/** The sun.misc.Unsafe instance, or null if Unsafe is unavailable. */
 	public static final Unsafe unsafe;
 
-	 public static final long byteArrayBaseOffset;
-	 public static final long floatArrayBaseOffset;
-	 public static final long doubleArrayBaseOffset;
-	 public static final long intArrayBaseOffset;
-	 public static final long longArrayBaseOffset;
-	 public static final long shortArrayBaseOffset;
-	 public static final long charArrayBaseOffset;
-	 public static final long booleanArrayBaseOffset;
- 
-	 static {
-		Unsafe tempUnsafe = null;
+	public static final long byteArrayBaseOffset;
+	public static final long floatArrayBaseOffset;
+	public static final long doubleArrayBaseOffset;
+	public static final long intArrayBaseOffset;
+	public static final long longArrayBaseOffset;
+	public static final long shortArrayBaseOffset;
+	public static final long charArrayBaseOffset;
+	public static final long booleanArrayBaseOffset;
 
-		 long tempByteArrayBaseOffset = 0;
-		 long tempFloatArrayBaseOffset = 0;
-		 long tempDoubleArrayBaseOffset = 0;
-		 long tempIntArrayBaseOffset = 0;
-		 long tempLongArrayBaseOffset = 0;
-		 long tempShortArrayBaseOffset = 0;
-		 long tempCharArrayBaseOffset = 0;
-		 long tempBooleanArrayBaseOffset = 0;
- 
-		 try {
-			 if (!Util.isAndroid) {
+	public static final VarHandle byteArrayVarHandle = MethodHandles.arrayElementVarHandle(byte[].class);
+	public static final VarHandle floatArrayVarHandle = MethodHandles.arrayElementVarHandle(float[].class);
+	public static final VarHandle charArrayVarHandle = MethodHandles.arrayElementVarHandle(char[].class);
+	public static final VarHandle intArrayVarHandle = MethodHandles.arrayElementVarHandle(int[].class);
+	public static final VarHandle longArrayVarHandle = MethodHandles.arrayElementVarHandle(long[].class);
+	public static final VarHandle shortArrayVarHandle = MethodHandles.arrayElementVarHandle(short[].class);
+	public static final VarHandle doubleArrayVarHandle = MethodHandles.arrayElementVarHandle(double[].class);
+	public static final VarHandle booleanArrayVarHandle = MethodHandles.arrayElementVarHandle(boolean[].class);
+
+	public static final Arena arena = Arena.ofShared();
+	public static MemorySegment byteBuffer;
+	public static long byteArrayLength = 0;
+	public static MemorySegment floatBuffer;
+	public static long floatArrayLength = 0;
+	public static MemorySegment doubleBuffer;
+	public static long doubleArrayLength = 0;
+	public static MemorySegment intBuffer;
+	public static long intArrayLength = 0;
+	public static MemorySegment longBuffer;
+	public static long longArrayLength = 0;
+	public static MemorySegment shortBuffer;
+	public static long shortArrayLength = 0;
+	public static MemorySegment charBuffer;
+	public static long charArrayLength = 0;
+	public static MemorySegment booleanBuffer;
+	public static long booleanArrayLength = 0;
+
+	static {
+		Unsafe tempUnsafe = null;
+		long tempByteArrayBaseOffset = 0;
+		long tempFloatArrayBaseOffset = 0;
+		long tempDoubleArrayBaseOffset = 0;
+		long tempIntArrayBaseOffset = 0;
+		long tempLongArrayBaseOffset = 0;
+		long tempShortArrayBaseOffset = 0;
+		long tempCharArrayBaseOffset = 0;
+		long tempBooleanArrayBaseOffset = 0;
+
+		try {
+			if (!Util.isAndroid) {
 				Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
 				field.setAccessible(true);
 				tempUnsafe = (sun.misc.Unsafe)field.get(null);
+				tempByteArrayBaseOffset = tempUnsafe.arrayBaseOffset(byte[].class);
+				tempCharArrayBaseOffset = tempUnsafe.arrayBaseOffset(char[].class);
+				tempShortArrayBaseOffset = tempUnsafe.arrayBaseOffset(short[].class);
+				tempIntArrayBaseOffset = tempUnsafe.arrayBaseOffset(int[].class);
+				tempFloatArrayBaseOffset = tempUnsafe.arrayBaseOffset(float[].class);
+				tempLongArrayBaseOffset = tempUnsafe.arrayBaseOffset(long[].class);
+				tempDoubleArrayBaseOffset = tempUnsafe.arrayBaseOffset(double[].class);
+				tempBooleanArrayBaseOffset = tempUnsafe.arrayBaseOffset(boolean[].class);
+			} else {
+				if (DEBUG) debug("kryo", "Unsafe is not available on Android.");
+			}
+		} catch (Exception ex) {
+			if (DEBUG) debug("kryo", "Unsafe is not available.", ex);
+		}
 
-				 VarHandle byteArrayVarHandle = MethodHandles.byteArrayViewVarHandle(byte[].class, ByteOrder.nativeOrder());
-				 VarHandle charArrayVarHandle = MethodHandles.byteArrayViewVarHandle(char[].class, ByteOrder.nativeOrder());
-				 VarHandle shortArrayVarHandle = MethodHandles.byteArrayViewVarHandle(short[].class, ByteOrder.nativeOrder());
-				 VarHandle intArrayVarHandle = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.nativeOrder());
-				 VarHandle floatArrayVarHandle = MethodHandles.byteArrayViewVarHandle(float[].class, ByteOrder.nativeOrder());
-				 VarHandle longArrayVarHandle = MethodHandles.byteArrayViewVarHandle(long[].class, ByteOrder.nativeOrder());
-				 VarHandle doubleArrayVarHandle = MethodHandles.byteArrayViewVarHandle(double[].class, ByteOrder.nativeOrder());
-				 VarHandle booleanArrayVarHandle = MethodHandles.byteArrayViewVarHandle(boolean[].class, ByteOrder.nativeOrder());
- 
-				 tempByteArrayBaseOffset = (long) byteArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempCharArrayBaseOffset = (long) charArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempShortArrayBaseOffset = (long) shortArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempIntArrayBaseOffset = (long) intArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempFloatArrayBaseOffset = (long) floatArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempLongArrayBaseOffset = (long) longArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempDoubleArrayBaseOffset = (long) doubleArrayVarHandle.coordinateTypes().get(0).getModifiers();
-				 tempBooleanArrayBaseOffset = (long) booleanArrayVarHandle.coordinateTypes().get(0).getModifiers();
-			 } else {
-				 if (DEBUG) debug("kryo", "Unsafe is not available on Android.");
-			 }
-		 } catch (Exception ex) {
-			 if (DEBUG) debug("kryo", "Unsafe is not available.", ex);
-		 }
- 
-		 byteArrayBaseOffset = tempByteArrayBaseOffset;
-		 charArrayBaseOffset = tempCharArrayBaseOffset;
-		 shortArrayBaseOffset = tempShortArrayBaseOffset;
-		 intArrayBaseOffset = tempIntArrayBaseOffset;
-		 floatArrayBaseOffset = tempFloatArrayBaseOffset;
-		 longArrayBaseOffset = tempLongArrayBaseOffset;
-		 doubleArrayBaseOffset = tempDoubleArrayBaseOffset;
-		 booleanArrayBaseOffset = tempBooleanArrayBaseOffset;
+		byteArrayBaseOffset = tempByteArrayBaseOffset;
+		charArrayBaseOffset = tempCharArrayBaseOffset;
+		shortArrayBaseOffset = tempShortArrayBaseOffset;
+		intArrayBaseOffset = tempIntArrayBaseOffset;
+		floatArrayBaseOffset = tempFloatArrayBaseOffset;
+		longArrayBaseOffset = tempLongArrayBaseOffset;
+		doubleArrayBaseOffset = tempDoubleArrayBaseOffset;
+		booleanArrayBaseOffset = tempBooleanArrayBaseOffset;
+		unsafe = tempUnsafe;
+	}
 
-		 unsafe = tempUnsafe;
-	 }
- 
-	 // Use a static inner class to defer initialization of direct buffer methods until first use
-	 private static final class DirectBuffers {
-		 // Constructor to be used for creation of ByteBuffers that use pre-allocated memory regions.
-		 private static Constructor<? extends ByteBuffer> directByteBufferConstructor;
-		 static {
-			 ByteBuffer buffer = ByteBuffer.allocateDirect(1);
-			 try {
-				 directByteBufferConstructor = buffer.getClass().getDeclaredConstructor(long.class, int.class);
-				 directByteBufferConstructor.setAccessible(true);
-			 } catch (Exception ex) {
-				 if (DEBUG) debug("kryo", "No direct ByteBuffer constructor is available.", ex);
-				 directByteBufferConstructor = null;
-			 }
-		 }
- 
-		 private static Method cleanerMethod, cleanMethod;
-		 static {
-			 try {
-				 cleanerMethod = DirectBuffer.class.getMethod("cleaner");
-				 cleanerMethod.setAccessible(true);
-				 cleanMethod = cleanerMethod.getReturnType().getMethod("clean");
-			 } catch (Exception ex) {
-				 if (DEBUG) debug("kryo", "No direct ByteBuffer clean method is available.", ex);
-				 cleanerMethod = null;
-			 }
-		 }
-	 }
- 
-	 /** Create a ByteBuffer that uses the specified off-heap memory address instead of allocating a new one.
-	  * @param address Address of the memory region to be used for a ByteBuffer.
-	  * @param size Size in bytes of the memory region.
-	  * @throws UnsupportedOperationException if creating a ByteBuffer this way is not available. */
-	 public static ByteBuffer newDirectBuffer (long address, int size) {
-		 if (!isNewDirectBufferAvailable())
-			 throw new UnsupportedOperationException("No direct ByteBuffer constructor is available.");
-		 try {
-			 return DirectBuffers.directByteBufferConstructor.newInstance(address, size);
-		 } catch (Exception ex) {
-			 throw new KryoException("Error creating a ByteBuffer at address: " + address, ex);
-		 }
-	 }
- 
-	 /** Returns true if {@link #newDirectBuffer(long, int)} can be called. */
-	 public static boolean isNewDirectBufferAvailable () {
-		 return DirectBuffers.directByteBufferConstructor != null;
-	 }
- 
-	 /** Release a direct buffer immediately rather than waiting for GC. */
-	 public static void dispose (ByteBuffer buffer) {
-		 if (!(buffer instanceof DirectBuffer)) return;
-		 if (DirectBuffers.cleanerMethod != null) {
-			 try {
-				 DirectBuffers.cleanMethod.invoke(DirectBuffers.cleanerMethod.invoke(buffer));
-			 } catch (Throwable ignored) {
-			 }
-		 }
-	 }
- }
- 
+	public void deallocate() {
+		arena.close();
+	}
+
+	// Use a static inner class to defer initialization of direct buffer methods until first use
+	private static final class DirectBuffers {
+		// Constructor to be used for creation of ByteBuffers that use pre-allocated memory regions.
+		private static Constructor<? extends ByteBuffer> directByteBufferConstructor;
+		static {
+			ByteBuffer buffer = ByteBuffer.allocateDirect(1);
+			try {
+				directByteBufferConstructor = buffer.getClass().getDeclaredConstructor(long.class, int.class);
+				directByteBufferConstructor.setAccessible(true);
+			} catch (Exception ex) {
+				if (DEBUG) debug("kryo", "No direct ByteBuffer constructor is available.", ex);
+				directByteBufferConstructor = null;
+			}
+		}
+
+		private static Method cleanerMethod, cleanMethod;
+		static {
+			try {
+				cleanerMethod = DirectBuffer.class.getMethod("cleaner");
+				cleanerMethod.setAccessible(true);
+				cleanMethod = cleanerMethod.getReturnType().getMethod("clean");
+			} catch (Exception ex) {
+				if (DEBUG) debug("kryo", "No direct ByteBuffer clean method is available.", ex);
+				cleanerMethod = null;
+			}
+		}
+	}
+
+	/** Create a ByteBuffer that uses the specified off-heap memory address instead of allocating a new one.
+	 * @param address Address of the memory region to be used for a ByteBuffer.
+	 * @param size Size in bytes of the memory region.
+	 * @throws UnsupportedOperationException if creating a ByteBuffer this way is not available. */
+	public static ByteBuffer newDirectBuffer (long address, int size) {
+		if (!isNewDirectBufferAvailable())
+			throw new UnsupportedOperationException("No direct ByteBuffer constructor is available.");
+		try {
+			return DirectBuffers.directByteBufferConstructor.newInstance(address, size);
+		} catch (Exception ex) {
+			throw new KryoException("Error creating a ByteBuffer at address: " + address, ex);
+		}
+	}
+
+	/** Returns true if {@link #newDirectBuffer(long, int)} can be called. */
+	public static boolean isNewDirectBufferAvailable () {
+		return DirectBuffers.directByteBufferConstructor != null;
+	}
+
+	/** Release a direct buffer immediately rather than waiting for GC. */
+	public static void dispose (ByteBuffer buffer) {
+		if (!(buffer instanceof DirectBuffer)) return;
+		if (DirectBuffers.cleanerMethod != null) {
+			try {
+				DirectBuffers.cleanMethod.invoke(DirectBuffers.cleanerMethod.invoke(buffer));
+			} catch (Throwable ignored) {
+			}
+		}
+	}
+}

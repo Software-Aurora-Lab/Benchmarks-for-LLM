@@ -17,301 +17,228 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
- package com.esotericsoftware.kryo.serializers;
+package com.esotericsoftware.kryo.serializers;
 
- import static com.esotericsoftware.kryo.unsafe.UnsafeUtil.*;
- 
- import com.esotericsoftware.kryo.KryoException;
- import com.esotericsoftware.kryo.io.Input;
- import com.esotericsoftware.kryo.io.Output;
- import com.esotericsoftware.kryo.serializers.FieldSerializer.CachedField;
- import com.esotericsoftware.kryo.util.Generics.GenericType;
- 
- import java.lang.invoke.MethodHandles;
- import java.lang.invoke.VarHandle;
- import java.lang.reflect.Field;
- 
- /** Read and write a non-primitive field using VarHandle.
-  * @Author Nathan Sweet */
- @SuppressWarnings("restriction")
- class UnsafeField extends ReflectField {
-	 private VarHandle handle;
- 
-	 public UnsafeField(Field field, FieldSerializer serializer, GenericType genericType) {
-		 super(field, serializer, genericType);
-		 try {
-			MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-            handle = lookup.unreflectVarHandle(field);
-		 } catch (IllegalAccessException e) {
-			 throw new RuntimeException(e);
-		 }
-	 }
- 
-	 public Object get(Object object) throws IllegalAccessException {
-		 return handle.get(object);
-	 }
- 
-	 public void set(Object object, Object value) throws IllegalAccessException {
-		 handle.set(object, value);
-	 }
- 
-	 public void copy(Object original, Object copy) {
-		 try {
-			 handle.set(copy, fieldSerializer.kryo.copy(handle.get(original)));
-		 } catch (KryoException ex) {
-			 ex.addTrace(this + " (" + fieldSerializer.type.getName() + ")");
-			 throw ex;
-		 } catch (Throwable t) {
-			 KryoException ex = new KryoException(t);
-			 ex.addTrace(this + " (" + fieldSerializer.type.getName() + ")");
-			 throw ex;
-		 }
-	 }
- 
-	 static final class IntUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public IntUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 if (varEncoding)
-				 output.writeVarInt((int) handle.get(object), false);
-			 else
-				 output.writeInt((int) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 if (varEncoding)
-				 handle.set(object, input.readVarInt(false));
-			 else
-				 handle.set(object, input.readInt());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class FloatUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public FloatUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeFloat((float) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readFloat());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class ShortUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public ShortUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeShort((short) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readShort());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class ByteUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public ByteUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeByte((byte) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readByte());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class BooleanUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public BooleanUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeBoolean((boolean) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readBoolean());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class CharUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public CharUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-            	handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeChar((char) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readChar());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class LongUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public LongUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-            	handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 if (varEncoding)
-				 output.writeVarLong((long) handle.get(object), false);
-			 else
-				 output.writeLong((long) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 if (varEncoding)
-				 handle.set(object, input.readVarLong(false));
-			 else
-				 handle.set(object, input.readLong());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class DoubleUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public DoubleUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeDouble((double) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readDouble());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- 
-	 static final class StringUnsafeField extends CachedField {
-		 private VarHandle handle;
- 
-		 public StringUnsafeField(Field field) {
-			 super(field);
-			 try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), MethodHandles.lookup());
-				handle = lookup.unreflectVarHandle(field);
-			 } catch (IllegalAccessException e) {
-				 throw new RuntimeException(e);
-			 }
-		 }
- 
-		 public void write(Output output, Object object) {
-			 output.writeString((String) handle.get(object));
-		 }
- 
-		 public void read(Input input, Object object) {
-			 handle.set(object, input.readString());
-		 }
- 
-		 public void copy(Object original, Object copy) {
-			 handle.set(copy, handle.get(original));
-		 }
-	 }
- }
- 
+import static com.esotericsoftware.kryo.unsafe.UnsafeUtil.*;
+
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.FieldSerializer.CachedField;
+import com.esotericsoftware.kryo.util.Generics.GenericType;
+
+import java.lang.reflect.Field;
+
+/** Read and write a non-primitive field using Unsafe.
+ * @author Nathan Sweet */
+@SuppressWarnings("restriction")
+class UnsafeField extends ReflectField {
+	public UnsafeField (Field field, FieldSerializer serializer, GenericType genericType) {
+		super(field, serializer, genericType);
+		offset = unsafe.objectFieldOffset(field);
+	}
+
+	public Object get (Object object) throws IllegalAccessException {
+		return unsafe.getObject(object, offset);
+	}
+
+	public void set (Object object, Object value) throws IllegalAccessException {
+		unsafe.putObject(object, offset, value);
+	}
+
+	public void copy (Object original, Object copy) {
+		try {
+			unsafe.putObject(copy, offset, fieldSerializer.kryo.copy(unsafe.getObject(original, offset)));
+		} catch (KryoException ex) {
+			ex.addTrace(this + " (" + fieldSerializer.type.getName() + ")");
+			throw ex;
+		} catch (Throwable t) {
+			KryoException ex = new KryoException(t);
+			ex.addTrace(this + " (" + fieldSerializer.type.getName() + ")");
+			throw ex;
+		}
+	}
+
+	static final class IntUnsafeField extends CachedField {
+		public IntUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			if (varEncoding)
+				output.writeVarInt(unsafe.getInt(object, offset), false);
+			else
+				output.writeInt(unsafe.getInt(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			if (varEncoding)
+				unsafe.putInt(object, offset, input.readVarInt(false));
+			else
+				unsafe.putInt(object, offset, input.readInt());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putInt(copy, offset, unsafe.getInt(original, offset));
+		}
+	}
+
+	static final class FloatUnsafeField extends CachedField {
+		public FloatUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeFloat(unsafe.getFloat(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putFloat(object, offset, input.readFloat());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putFloat(copy, offset, unsafe.getFloat(original, offset));
+		}
+	}
+
+	static final class ShortUnsafeField extends CachedField {
+		public ShortUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeShort(unsafe.getShort(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putShort(object, offset, input.readShort());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putShort(copy, offset, unsafe.getShort(original, offset));
+		}
+	}
+
+	static final class ByteUnsafeField extends CachedField {
+		public ByteUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeByte(unsafe.getByte(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putByte(object, offset, input.readByte());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putByte(copy, offset, unsafe.getByte(original, offset));
+		}
+	}
+
+	static final class BooleanUnsafeField extends CachedField {
+		public BooleanUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeBoolean(unsafe.getBoolean(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putBoolean(object, offset, input.readBoolean());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putBoolean(copy, offset, unsafe.getBoolean(original, offset));
+		}
+	}
+
+	static final class CharUnsafeField extends CachedField {
+		public CharUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeChar(unsafe.getChar(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putChar(object, offset, input.readChar());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putChar(copy, offset, unsafe.getChar(original, offset));
+		}
+	}
+
+	static final class LongUnsafeField extends CachedField {
+		public LongUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			if (varEncoding)
+				output.writeVarLong(unsafe.getLong(object, offset), false);
+			else
+				output.writeLong(unsafe.getLong(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			if (varEncoding)
+				unsafe.putLong(object, offset, input.readVarLong(false));
+			else
+				unsafe.putLong(object, offset, input.readLong());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putLong(copy, offset, unsafe.getLong(original, offset));
+		}
+	}
+
+	static final class DoubleUnsafeField extends CachedField {
+		public DoubleUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeDouble(unsafe.getDouble(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putDouble(object, offset, input.readDouble());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putDouble(copy, offset, unsafe.getDouble(original, offset));
+		}
+	}
+
+	static final class StringUnsafeField extends CachedField {
+		public StringUnsafeField (Field field) {
+			super(field);
+			offset = unsafe.objectFieldOffset(field);
+		}
+
+		public void write (Output output, Object object) {
+			output.writeString((String)unsafe.getObject(object, offset));
+		}
+
+		public void read (Input input, Object object) {
+			unsafe.putObject(object, offset, input.readString());
+		}
+
+		public void copy (Object original, Object copy) {
+			unsafe.putObject(copy, offset, unsafe.getObject(original, offset));
+		}
+	}
+}

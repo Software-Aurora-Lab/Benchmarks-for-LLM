@@ -169,6 +169,7 @@ class ReflectField extends CachedField {
 			throw ex;
 		} catch (Throwable t) {
 			KryoException ex = new KryoException(t);
+			ex.addTrace(name + " (" + fieldSerializer.type.getName() + ")");
 			throw ex;
 		}
 	}

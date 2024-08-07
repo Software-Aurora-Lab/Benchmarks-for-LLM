@@ -1,0 +1,4 @@
+package com.esotericsoftware.kryo.benchmarks.jmh_generated;
+public class MapBenchmark_MissBenchmarkState_jmhType extends MapBenchmark_MissBenchmarkState_jmhType_B3 {
+}
+

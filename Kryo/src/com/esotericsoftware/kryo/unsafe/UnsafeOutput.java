@@ -17,165 +17,169 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
- package com.esotericsoftware.kryo.unsafe;
+package com.esotericsoftware.kryo.unsafe;
 
- import static com.esotericsoftware.kryo.unsafe.UnsafeUtil.*;
- 
- import com.esotericsoftware.kryo.KryoException;
- import com.esotericsoftware.kryo.io.Output;
- import com.esotericsoftware.kryo.util.Util;
- 
- import java.io.OutputStream;
- import java.lang.invoke.MethodHandles;
- import java.lang.invoke.VarHandle;
- 
- /** An {@link Output} that writes data using sun.misc.Unsafe. Multi-byte primitive types use native byte order, so the native byte
-  * order on different computers which read and write the data must be the same.
-  * <p>
-  * Not available on all JVMs. {@link Util#unsafe} can be checked before using this class.
-  * <p>
-  * This class may be much faster when {@link #setVariableLengthEncoding(boolean)} is false.
-  * @author Roman Levenstein <romixlev@gmail.com>
-  * @author Nathan Sweet */
- @SuppressWarnings("restriction")
- public class UnsafeOutput extends Output {
-	 private static final VarHandle BYTE_HANDLE = MethodHandles.byteArrayViewVarHandle(byte[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle SHORT_HANDLE = MethodHandles.byteArrayViewVarHandle(short[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle INT_HANDLE = MethodHandles.byteArrayViewVarHandle(int[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle LONG_HANDLE = MethodHandles.byteArrayViewVarHandle(long[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle FLOAT_HANDLE = MethodHandles.byteArrayViewVarHandle(float[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle DOUBLE_HANDLE = MethodHandles.byteArrayViewVarHandle(double[].class, java.nio.ByteOrder.nativeOrder());
-	 private static final VarHandle CHAR_HANDLE = MethodHandles.byteArrayViewVarHandle(char[].class, java.nio.ByteOrder.nativeOrder());
- 
-	 public UnsafeOutput() {
-	 }
- 
-	 public UnsafeOutput(int bufferSize) {
-		 this(bufferSize, bufferSize);
-	 }
- 
-	 public UnsafeOutput(int bufferSize, int maxBufferSize) {
-		 super(bufferSize, maxBufferSize);
-	 }
- 
-	 public UnsafeOutput(byte[] buffer) {
-		 this(buffer, buffer.length);
-	 }
- 
-	 public UnsafeOutput(byte[] buffer, int maxBufferSize) {
-		 super(buffer, maxBufferSize);
-	 }
- 
-	 public UnsafeOutput(OutputStream outputStream) {
-		 super(outputStream);
-	 }
- 
-	 public UnsafeOutput(OutputStream outputStream, int bufferSize) {
-		 super(outputStream, bufferSize);
-	 }
- 
-	 public void write(int value) throws KryoException {
-		 if (position == capacity) require(1);
-		 BYTE_HANDLE.set(buffer, position++, (byte) value);
-	 }
- 
-	 public void writeByte(byte value) throws KryoException {
-		 if (position == capacity) require(1);
-		 BYTE_HANDLE.set(buffer, position++, value);
-	 }
- 
-	 public void writeByte(int value) throws KryoException {
-		 if (position == capacity) require(1);
-		 BYTE_HANDLE.set(buffer, position++, (byte) value);
-	 }
- 
-	 public void writeInt(int value) throws KryoException {
-		 require(4);
-		 INT_HANDLE.set(buffer, position, value);
-		 position += 4;
-	 }
- 
-	 public void writeLong(long value) throws KryoException {
-		 require(8);
-		 LONG_HANDLE.set(buffer, position, value);
-		 position += 8;
-	 }
- 
-	 public void writeFloat(float value) throws KryoException {
-		 require(4);
-		 FLOAT_HANDLE.set(buffer, position, value);
-		 position += 4;
-	 }
- 
-	 public void writeDouble(double value) throws KryoException {
-		 require(8);
-		 DOUBLE_HANDLE.set(buffer, position, value);
-		 position += 8;
-	 }
- 
-	 public void writeShort(int value) throws KryoException {
-		 require(2);
-		 SHORT_HANDLE.set(buffer, position, (short) value);
-		 position += 2;
-	 }
- 
-	 public void writeChar(char value) throws KryoException {
-		 require(2);
-		 CHAR_HANDLE.set(buffer, position, value);
-		 position += 2;
-	 }
- 
-	 public void writeBoolean(boolean value) throws KryoException {
-		 if (position == capacity) require(1);
-		 BYTE_HANDLE.set(buffer, position++, value ? (byte) 1 : 0);
-	 }
- 
-	 public void writeInts(int[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeInt(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeLongs(long[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeLong(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeFloats(float[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeFloat(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeDoubles(double[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeDouble(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeShorts(short[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeShort(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeChars(char[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeChar(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeBooleans(boolean[] array, int offset, int count) throws KryoException {
-		 for (int i = 0; i < count; i++) {
-			 writeBoolean(array[offset + i]);
-		 }
-	 }
- 
-	 public void writeBytes(byte[] array, int offset, int count) throws KryoException {
-		 if (position + count > capacity) require(count);
-		 System.arraycopy(array, offset, buffer, position, count);
-		 position += count;
-	 }
- }
- 
+import static com.esotericsoftware.kryo.unsafe.UnsafeUtil.*;
+
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.util.Util;
+
+import java.io.OutputStream;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.Arrays;
+
+/** An {@link Output} that reads data using sun.misc.Unsafe. Multi-byte primitive types use native byte order, so the native byte
+ * order on different computers which read and write the data must be the same.
+ * <p>
+ * Not available on all JVMs. {@link Util#unsafe} can be checked before using this class.
+ * <p>
+ * This class may be much faster when {@link #setVariableLengthEncoding(boolean)} is false.
+ * @author Roman Levenstein <romixlev@gmail.com>
+ * @author Nathan Sweet */
+@SuppressWarnings("restriction")
+public class UnsafeOutput extends Output {
+	/** Creates an uninitialized Output, {@link #setBuffer(byte[], int)} must be called before the Output is used. */
+	public UnsafeOutput () {
+	}
+
+	/** Creates a new Output for writing to a byte[].
+	 * @param bufferSize The size of the buffer. An exception is thrown if more bytes than this are written and {@link #flush()}
+	 *           does not empty the buffer. */
+	public UnsafeOutput (int bufferSize) {
+		this(bufferSize, bufferSize);
+	}
+
+	/** Creates a new Output for writing to a byte[].
+	 * @param bufferSize The initial size of the buffer.
+	 * @param maxBufferSize If {@link #flush()} does not empty the buffer, the buffer is doubled as needed until it exceeds
+	 *           maxBufferSize and an exception is thrown. Can be -1 for no maximum. */
+	public UnsafeOutput (int bufferSize, int maxBufferSize) {
+		super(bufferSize, maxBufferSize);
+	}
+
+	/** Creates a new Output for writing to a byte[].
+	 * @see #setBuffer(byte[]) */
+	public UnsafeOutput (byte[] buffer) {
+		this(buffer, buffer.length);
+	}
+
+	/** Creates a new Output for writing to a byte[].
+	 * @see #setBuffer(byte[], int) */
+	public UnsafeOutput (byte[] buffer, int maxBufferSize) {
+		super(buffer, maxBufferSize);
+	}
+
+	/** Creates a new Output for writing to an OutputStream. A buffer size of 4096 is used. */
+	public UnsafeOutput (OutputStream outputStream) {
+		super(outputStream);
+	}
+
+	/** Creates a new Output for writing to an OutputStream with the specified buffer size. */
+	public UnsafeOutput (OutputStream outputStream, int bufferSize) {
+		super(outputStream, bufferSize);
+	}
+
+	public void write (int value) throws KryoException {
+		if (position == capacity) require(1);
+		unsafe.putByte(buffer, byteArrayBaseOffset + position++, (byte)value);
+	}
+
+	public void writeByte (byte value) throws KryoException {
+		if (position == capacity) require(1);
+		unsafe.putByte(buffer, byteArrayBaseOffset + position++, value);
+	}
+
+	public void writeByte (int value) throws KryoException {
+		if (position == capacity) require(1);
+		unsafe.putByte(buffer, byteArrayBaseOffset + position++, (byte)value);
+	}
+
+	public void writeInt (int value) throws KryoException {
+		require(4);
+		unsafe.putInt(buffer, byteArrayBaseOffset + position, value);
+		position += 4;
+	}
+
+	public void writeLong (long value) throws KryoException {
+		require(8);
+		unsafe.putLong(buffer, byteArrayBaseOffset + position, value);
+		position += 8;
+	}
+
+	public void writeFloat (float value) throws KryoException {
+		require(4);
+		unsafe.putFloat(buffer, byteArrayBaseOffset + position, value);
+		position += 4;
+	}
+
+	public void writeDouble (double value) throws KryoException {
+		require(8);
+		unsafe.putDouble(buffer, byteArrayBaseOffset + position, value);
+		position += 8;
+	}
+
+	public void writeShort (int value) throws KryoException {
+		require(2);
+		unsafe.putShort(buffer, byteArrayBaseOffset + position, (short)value);
+		position += 2;
+	}
+
+	public void writeChar (char value) throws KryoException {
+		require(2);
+		unsafe.putChar(buffer, byteArrayBaseOffset + position, value);
+		position += 2;
+	}
+
+	public void writeBoolean (boolean value) throws KryoException {
+		if (position == capacity) require(1);
+		unsafe.putByte(buffer, byteArrayBaseOffset + position++, value ? (byte)1 : 0);
+	}
+
+	public void writeInts (int[] array, int offset, int count) throws KryoException {
+		writeBytes(array, intArrayBaseOffset, array.length << 2);
+	}
+
+	public void writeLongs (long[] array, int offset, int count) throws KryoException {
+		longBuffer = MemorySegment.ofArray(array);
+	}
+
+	public void writeFloats (float[] array, int offset, int count) throws KryoException {
+		writeBytes(array, floatArrayBaseOffset, array.length << 2);
+	}
+
+	public void writeDoubles (double[] array, int offset, int count) throws KryoException {
+		writeBytes(array, doubleArrayBaseOffset, array.length << 3);
+	}
+
+	public void writeShorts (short[] array, int offset, int count) throws KryoException {
+		writeBytes(array, shortArrayBaseOffset, array.length << 1);
+	}
+
+	public void writeChars (char[] array, int offset, int count) throws KryoException {
+		writeBytes(array, charArrayBaseOffset, array.length << 1);
+	}
+
+	public void writeBooleans (boolean[] array, int offset, int count) throws KryoException {
+		writeBytes(array, booleanArrayBaseOffset, array.length);
+	}
+
+	public void writeBytes (byte[] array, int offset, int count) throws KryoException {
+		writeBytes(array, byteArrayBaseOffset + offset, count);
+	}
+
+	/** Write count bytes to the byte buffer, reading from the given offset inside the in-memory representation of the object. */
+	public void writeBytes (Object from, long offset, int count) throws KryoException {
+		int copyCount = Math.min(capacity - position, count);
+		while (true) {
+			unsafe.copyMemory(from, offset, buffer, byteArrayBaseOffset + position, copyCount);
+			position += copyCount;
+			count -= copyCount;
+			if (count == 0) break;
+			offset += copyCount;
+			copyCount = Math.min(capacity, count);
+			require(copyCount);
+		}
+	}
+}
