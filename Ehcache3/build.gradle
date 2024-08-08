@@ -1,0 +1,66 @@
+/*
+ * Copyright Terracotta, Inc.
+ * Copyright Super iPaaS Integration LLC, an IBM Company 2024
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+  // This adds tasks to auto close or release nexus staging repos
+  // see https://github.com/gradle-nexus/publish-plugin
+  id 'io.github.gradle-nexus.publish-plugin'
+  //OWASP Security Vulnerability Detection
+  id 'org.owasp.dependencycheck'
+}
+
+wrapper {
+  distributionType = Wrapper.DistributionType.ALL
+}
+
+allprojects {
+  version = findProperty('overrideVersion') ?: ehcacheVersion
+}
+
+nexusPublishing {
+  repositories {
+    sonatype {
+      username = sonatypeUser
+      password = sonatypePwd
+      packageGroup = 'org.ehcache' //Sonatype staging repository name
+    }
+    nexus {
+      username = tcDeployUser
+      password = tcDeployPassword
+      packageGroup = 'Ehcache OS' //internal staging repository name
+      nexusUrl.set(uri('https://nexus.terracotta.eur.ad.sag:8443/service/local/'))
+      snapshotRepositoryUrl.set(uri("https://nexus.terracotta.eur.ad.sag:8443/content/repositories/terracotta-os-snapshots/"))
+    }
+  }
+  // Sonatype is often very slow in these operations:
+  transitionCheckOptions {
+    delayBetween = Duration.ofSeconds((findProperty('delayBetweenRetriesInSeconds') ?: '10') as int)
+    maxRetries = (findProperty('numberOfRetries') ?: '100') as int
+  }
+}
+
+assert (JavaVersion.current().isJava8Compatible()) : 'The Ehcache 3 build requires Java 8+ to run'
+
+dependencyCheck {
+  failBuildOnCVSS = 0
+  suppressionFile = 'config/owasp-supressions.xml'
+  skipConfigurations += ['checkstyle', 'spotbugs', 'xjcClasspath', 'jakartaXjcClasspath', 'commonXjcClasspath']
+  skipProjects += [':docs', ':demos:00-NoCache', ':demos:01-CacheAside']
+}
+tasks.register('check') {
+  dependsOn dependencyCheckAggregate
+}

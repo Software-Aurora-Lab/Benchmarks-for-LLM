@@ -34,7 +34,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
-import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
 /** Utility methods for using {@link sun.misc.Unsafe}.
@@ -44,88 +43,57 @@ import sun.nio.ch.DirectBuffer;
 @SuppressWarnings("restriction")
 public class UnsafeUtil {
 	/** The sun.misc.Unsafe instance, or null if Unsafe is unavailable. */
-	public static final Unsafe unsafe;
-
-	public static final long byteArrayBaseOffset;
-	public static final long floatArrayBaseOffset;
-	public static final long doubleArrayBaseOffset;
-	public static final long intArrayBaseOffset;
-	public static final long longArrayBaseOffset;
-	public static final long shortArrayBaseOffset;
-	public static final long charArrayBaseOffset;
-	public static final long booleanArrayBaseOffset;
-
-	public static final VarHandle byteArrayVarHandle = MethodHandles.arrayElementVarHandle(byte[].class);
-	public static final VarHandle floatArrayVarHandle = MethodHandles.arrayElementVarHandle(float[].class);
-	public static final VarHandle charArrayVarHandle = MethodHandles.arrayElementVarHandle(char[].class);
-	public static final VarHandle intArrayVarHandle = MethodHandles.arrayElementVarHandle(int[].class);
-	public static final VarHandle longArrayVarHandle = MethodHandles.arrayElementVarHandle(long[].class);
-	public static final VarHandle shortArrayVarHandle = MethodHandles.arrayElementVarHandle(short[].class);
-	public static final VarHandle doubleArrayVarHandle = MethodHandles.arrayElementVarHandle(double[].class);
-	public static final VarHandle booleanArrayVarHandle = MethodHandles.arrayElementVarHandle(boolean[].class);
-
-	public static final Arena arena = Arena.ofShared();
-	public static MemorySegment byteBuffer;
-	public static long byteArrayLength = 0;
-	public static MemorySegment floatBuffer;
-	public static long floatArrayLength = 0;
-	public static MemorySegment doubleBuffer;
-	public static long doubleArrayLength = 0;
-	public static MemorySegment intBuffer;
-	public static long intArrayLength = 0;
-	public static MemorySegment longBuffer;
-	public static long longArrayLength = 0;
-	public static MemorySegment shortBuffer;
-	public static long shortArrayLength = 0;
-	public static MemorySegment charBuffer;
-	public static long charArrayLength = 0;
-	public static MemorySegment booleanBuffer;
-	public static long booleanArrayLength = 0;
+//	public static final Unsafe unsafe;
+//
+//	public static final long byteArrayBaseOffset;
+//	public static final long floatArrayBaseOffset;
+//	public static final long doubleArrayBaseOffset;
+//	public static final long intArrayBaseOffset;
+//	public static final long longArrayBaseOffset;
+//	public static final long shortArrayBaseOffset;
+//	public static final long charArrayBaseOffset;
+//	public static final long booleanArrayBaseOffset;
 
 	static {
-		Unsafe tempUnsafe = null;
-		long tempByteArrayBaseOffset = 0;
-		long tempFloatArrayBaseOffset = 0;
-		long tempDoubleArrayBaseOffset = 0;
-		long tempIntArrayBaseOffset = 0;
-		long tempLongArrayBaseOffset = 0;
-		long tempShortArrayBaseOffset = 0;
-		long tempCharArrayBaseOffset = 0;
-		long tempBooleanArrayBaseOffset = 0;
-
-		try {
-			if (!Util.isAndroid) {
-				Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-				field.setAccessible(true);
-				tempUnsafe = (sun.misc.Unsafe)field.get(null);
-				tempByteArrayBaseOffset = tempUnsafe.arrayBaseOffset(byte[].class);
-				tempCharArrayBaseOffset = tempUnsafe.arrayBaseOffset(char[].class);
-				tempShortArrayBaseOffset = tempUnsafe.arrayBaseOffset(short[].class);
-				tempIntArrayBaseOffset = tempUnsafe.arrayBaseOffset(int[].class);
-				tempFloatArrayBaseOffset = tempUnsafe.arrayBaseOffset(float[].class);
-				tempLongArrayBaseOffset = tempUnsafe.arrayBaseOffset(long[].class);
-				tempDoubleArrayBaseOffset = tempUnsafe.arrayBaseOffset(double[].class);
-				tempBooleanArrayBaseOffset = tempUnsafe.arrayBaseOffset(boolean[].class);
-			} else {
-				if (DEBUG) debug("kryo", "Unsafe is not available on Android.");
-			}
-		} catch (Exception ex) {
-			if (DEBUG) debug("kryo", "Unsafe is not available.", ex);
-		}
-
-		byteArrayBaseOffset = tempByteArrayBaseOffset;
-		charArrayBaseOffset = tempCharArrayBaseOffset;
-		shortArrayBaseOffset = tempShortArrayBaseOffset;
-		intArrayBaseOffset = tempIntArrayBaseOffset;
-		floatArrayBaseOffset = tempFloatArrayBaseOffset;
-		longArrayBaseOffset = tempLongArrayBaseOffset;
-		doubleArrayBaseOffset = tempDoubleArrayBaseOffset;
-		booleanArrayBaseOffset = tempBooleanArrayBaseOffset;
-		unsafe = tempUnsafe;
-	}
-
-	public void deallocate() {
-		arena.close();
+//		Unsafe tempUnsafe = null;
+//		long tempByteArrayBaseOffset = 0;
+//		long tempFloatArrayBaseOffset = 0;
+//		long tempDoubleArrayBaseOffset = 0;
+//		long tempIntArrayBaseOffset = 0;
+//		long tempLongArrayBaseOffset = 0;
+//		long tempShortArrayBaseOffset = 0;
+//		long tempCharArrayBaseOffset = 0;
+//		long tempBooleanArrayBaseOffset = 0;
+//
+//		try {
+//			if (!Util.isAndroid) {
+//				Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+//				field.setAccessible(true);
+//				tempUnsafe = (sun.misc.Unsafe)field.get(null);
+//				tempByteArrayBaseOffset = tempUnsafe.arrayBaseOffset(byte[].class);
+//				tempCharArrayBaseOffset = tempUnsafe.arrayBaseOffset(char[].class);
+//				tempShortArrayBaseOffset = tempUnsafe.arrayBaseOffset(short[].class);
+//				tempIntArrayBaseOffset = tempUnsafe.arrayBaseOffset(int[].class);
+//				tempFloatArrayBaseOffset = tempUnsafe.arrayBaseOffset(float[].class);
+//				tempLongArrayBaseOffset = tempUnsafe.arrayBaseOffset(long[].class);
+//				tempDoubleArrayBaseOffset = tempUnsafe.arrayBaseOffset(double[].class);
+//				tempBooleanArrayBaseOffset = tempUnsafe.arrayBaseOffset(boolean[].class);
+//			} else {
+//				if (DEBUG) debug("kryo", "Unsafe is not available on Android.");
+//			}
+//		} catch (Exception ex) {
+//			if (DEBUG) debug("kryo", "Unsafe is not available.", ex);
+//		}
+//
+//		byteArrayBaseOffset = tempByteArrayBaseOffset;
+//		charArrayBaseOffset = tempCharArrayBaseOffset;
+//		shortArrayBaseOffset = tempShortArrayBaseOffset;
+//		intArrayBaseOffset = tempIntArrayBaseOffset;
+//		floatArrayBaseOffset = tempFloatArrayBaseOffset;
+//		longArrayBaseOffset = tempLongArrayBaseOffset;
+//		doubleArrayBaseOffset = tempDoubleArrayBaseOffset;
+//		booleanArrayBaseOffset = tempBooleanArrayBaseOffset;
+//		unsafe = tempUnsafe;
 	}
 
 	// Use a static inner class to defer initialization of direct buffer methods until first use

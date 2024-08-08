@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.esotericsoftware.kryo.kryo5
+Bnd-LastModified: 1723094390134
+Build-Jdk-Spec: 22
+Bundle-Description: Fast, efficient Java serialization. This is the vers
+ ion specific Kryo artifact.
+Bundle-License: https://opensource.org/licenses/BSD-3-Clause
+Bundle-ManifestVersion: 2
+Bundle-Name: Kryo 5
+Bundle-SymbolicName: com.esotericsoftware.kryo.5
+Bundle-Version: 5.6.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin 5.1.9
+Export-Package: com.esotericsoftware.kryo.kryo5;version="5.6.1",com.esot
+ ericsoftware.kryo.kryo5.io;version="5.6.1",com.esotericsoftware.kryo.kr
+ yo5.serializers;version="5.6.1",com.esotericsoftware.kryo.kryo5.unsafe;
+ version="5.6.1",com.esotericsoftware.kryo.kryo5.util;version="5.6.1",co
+ m.esotericsoftware.kryo.kryo5.objenesis;version="5.6.1",com.esotericsof
+ tware.kryo.kryo5.objenesis.instantiator;version="5.6.1",com.esotericsof
+ tware.kryo.kryo5.objenesis.strategy;version="5.6.1"
+Import-Package: sun.nio.ch;resolution:=optional,sun.reflect;resolution:=
+ optional,sun.misc;resolution:=optional
+Originally-Created-By: Apache Maven Bundle Plugin 5.1.9
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=22))"
+Tool: Bnd-6.3.1.202206071316

@@ -7,7 +7,6 @@ com/esotericsoftware/kryo/SerializerFactory$BaseSerializerFactory.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$URLSerializer.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$URISerializer.class
 com/esotericsoftware/kryo/unsafe/UnsafeOutput.class
-com/esotericsoftware/kryo/serializers/UnsafeField$DoubleUnsafeField.class
 com/esotericsoftware/kryo/util/CuckooObjectMap.class
 com/esotericsoftware/kryo/util/IntMap$Values.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$IntSerializer.class
@@ -26,7 +25,6 @@ com/esotericsoftware/kryo/util/Null.class
 com/esotericsoftware/kryo/serializers/ReflectField$BooleanReflectField.class
 com/esotericsoftware/kryo/serializers/ReflectField.class
 com/esotericsoftware/kryo/serializers/ReflectField$ShortReflectField.class
-com/esotericsoftware/kryo/serializers/UnsafeField$StringUnsafeField.class
 com/esotericsoftware/kryo/serializers/ImmutableSerializer.class
 com/esotericsoftware/kryo/serializers/RecordSerializer.class
 com/esotericsoftware/kryo/serializers/ImmutableCollectionsSerializers$JdkImmutableListSerializer.class
@@ -59,7 +57,6 @@ com/esotericsoftware/kryo/serializers/OptionalSerializers$OptionalSerializer.cla
 com/esotericsoftware/kryo/serializers/ImmutableCollectionsSerializers$JdkImmutableMapSerializer.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$StringSerializer.class
 com/esotericsoftware/kryo/io/KryoDataOutput.class
-com/esotericsoftware/kryo/serializers/UnsafeField$ShortUnsafeField.class
 com/esotericsoftware/kryo/serializers/DefaultArraySerializers.class
 com/esotericsoftware/kryo/util/CuckooObjectMap$Values.class
 com/esotericsoftware/kryo/util/ObjectMap$Keys.class
@@ -136,11 +133,9 @@ com/esotericsoftware/kryo/serializers/BlowfishSerializer$1.class
 com/esotericsoftware/kryo/io/KryoBufferOverflowException.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$UUIDSerializer.class
 com/esotericsoftware/kryo/serializers/DefaultArraySerializers$ByteArraySerializer.class
-com/esotericsoftware/kryo/serializers/UnsafeField$LongUnsafeField.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$TimeZoneSerializer.class
 com/esotericsoftware/kryo/serializers/BeanSerializer$CachedProperty.class
 com/esotericsoftware/kryo/SerializerFactory.class
-com/esotericsoftware/kryo/serializers/UnsafeField$BooleanUnsafeField.class
 com/esotericsoftware/kryo/util/CuckooObjectMap$MapIterator.class
 com/esotericsoftware/kryo/unsafe/UnsafeUtil$DirectBuffers.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$CurrencySerializer.class
@@ -166,7 +161,6 @@ com/esotericsoftware/kryo/serializers/DefaultArraySerializers$CharArraySerialize
 com/esotericsoftware/kryo/io/Input.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$StringBufferSerializer.class
 com/esotericsoftware/kryo/serializers/DeflateSerializer.class
-com/esotericsoftware/kryo/serializers/UnsafeField$ByteUnsafeField.class
 com/esotericsoftware/kryo/Serializer.class
 com/esotericsoftware/kryo/serializers/RecordSerializer$RecordComponent.class
 com/esotericsoftware/kryo/Kryo$DefaultSerializerEntry.class
@@ -203,13 +197,10 @@ com/esotericsoftware/kryo/util/ObjectIntMap$Keys.class
 com/esotericsoftware/kryo/serializers/DefaultSerializers$AtomicReferenceSerializer.class
 com/esotericsoftware/kryo/serializers/CollectionSerializer$BindCollection.class
 com/esotericsoftware/kryo/SerializerFactory$ReflectionSerializerFactory.class
-com/esotericsoftware/kryo/serializers/UnsafeField$IntUnsafeField.class
 com/esotericsoftware/kryo/KryoException.class
 com/esotericsoftware/kryo/serializers/DefaultArraySerializers$BooleanArraySerializer.class
-com/esotericsoftware/kryo/serializers/UnsafeField$FloatUnsafeField.class
 com/esotericsoftware/kryo/serializers/RecordSerializer$2.class
 com/esotericsoftware/kryo/serializers/CachedFields.class
-com/esotericsoftware/kryo/serializers/UnsafeField$CharUnsafeField.class
 com/esotericsoftware/kryo/serializers/OptionalSerializers.class
 com/esotericsoftware/kryo/util/Pool$SoftReferenceQueue.class
 com/esotericsoftware/kryo/serializers/AsmField$IntAsmField.class

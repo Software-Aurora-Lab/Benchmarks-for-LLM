@@ -22,25 +22,39 @@ package com.esotericsoftware.kryo.io;
 import static com.esotericsoftware.kryo.KryoAssert.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.esotericsoftware.kryo.Unsafe;
+import sun.misc.Unsafe;
 import com.esotericsoftware.kryo.unsafe.UnsafeByteBufferInput;
 import com.esotericsoftware.kryo.unsafe.UnsafeByteBufferOutput;
 import com.esotericsoftware.kryo.unsafe.UnsafeUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 import java.util.Random;
 
+import com.esotericsoftware.kryo.util.Util;
 import org.junit.jupiter.api.Test;
 
 /** @author Roman Levenstein <romixlev@gmail.com> */
-@Unsafe
 @SuppressWarnings("restriction")
 class UnsafeByteBufferInputOutputTest {
+	public static Unsafe unsafe = null;
+
+	static {
+		try {
+			if (!Util.isAndroid) {
+				Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+				field.setAccessible(true);
+				unsafe = (Unsafe) field.get(null);
+			}
+		} catch (Exception ex){
+			ex.printStackTrace();
+		}
+	}
 
 	@Test
 	void testByteBufferOutputWithPreallocatedMemory () {
-		long bufAddress = UnsafeUtil.unsafe.allocateMemory(4096);
+		long bufAddress = unsafe.allocateMemory(4096);
 		try {
 			ByteBufferOutput outputBuffer = new ByteBufferOutput(UnsafeUtil.newDirectBuffer(bufAddress, 4096));
 			outputBuffer.writeInt(10);
@@ -63,7 +77,7 @@ class UnsafeByteBufferInputOutputTest {
 			System.err.println("Streams with preallocated direct memory are not supported on this JVM");
 			t.printStackTrace();
 		} finally {
-			UnsafeUtil.unsafe.freeMemory(bufAddress);
+			unsafe.freeMemory(bufAddress);
 		}
 	}
 

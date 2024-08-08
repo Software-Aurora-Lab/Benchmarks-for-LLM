@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/build-logic" name="build-logic">
+                <projects>
+                  <project path="$PROJECT_DIR$/build-logic" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/build-logic" />
+            <option value="$PROJECT_DIR$/clustered" />
+            <option value="$PROJECT_DIR$/clustered/ehcache-client" />
+            <option value="$PROJECT_DIR$/clustered/ehcache-clustered" />
+            <option value="$PROJECT_DIR$/clustered/ehcache-common" />
+            <option value="$PROJECT_DIR$/clustered/ehcache-common-api" />
+            <option value="$PROJECT_DIR$/clustered/integration-test" />
+            <option value="$PROJECT_DIR$/clustered/ops-tool" />
+            <option value="$PROJECT_DIR$/clustered/osgi-test" />
+            <option value="$PROJECT_DIR$/clustered/server" />
+            <option value="$PROJECT_DIR$/clustered/server/ehcache-entity" />
+            <option value="$PROJECT_DIR$/clustered/server/ehcache-service" />
+            <option value="$PROJECT_DIR$/clustered/server/ehcache-service-api" />
+            <option value="$PROJECT_DIR$/clustered/test-utils" />
+            <option value="$PROJECT_DIR$/core-spi-test" />
+            <option value="$PROJECT_DIR$/demos" />
+            <option value="$PROJECT_DIR$/demos/00-NoCache" />
+            <option value="$PROJECT_DIR$/demos/01-CacheAside" />
+            <option value="$PROJECT_DIR$/docs" />
+            <option value="$PROJECT_DIR$/ehcache" />
+            <option value="$PROJECT_DIR$/ehcache-107" />
+            <option value="$PROJECT_DIR$/ehcache-api" />
+            <option value="$PROJECT_DIR$/ehcache-core" />
+            <option value="$PROJECT_DIR$/ehcache-impl" />
+            <option value="$PROJECT_DIR$/ehcache-management" />
+            <option value="$PROJECT_DIR$/ehcache-transactions" />
+            <option value="$PROJECT_DIR$/ehcache-xml" />
+            <option value="$PROJECT_DIR$/ehcache-xml/ehcache-xml-spi" />
+            <option value="$PROJECT_DIR$/integration-test" />
+            <option value="$PROJECT_DIR$/osgi-test" />
+            <option value="$PROJECT_DIR$/spi-tester" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

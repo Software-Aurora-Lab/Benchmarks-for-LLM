@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Implementation-Title: 01-CacheAside
+Implementation-Vendor-Id: Ehcache3.demos
+Implementation-Version: 3.11-SNAPSHOT
+Implementation-Revision: ba5290b1f256af7f2da4d4065bc9e74690bcc3a5
+Built-By: jrx
+Built-JDK: 19.0.1
+

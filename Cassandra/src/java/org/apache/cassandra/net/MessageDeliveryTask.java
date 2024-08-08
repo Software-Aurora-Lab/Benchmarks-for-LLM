@@ -1,0 +1,123 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.cassandra.net;
+
+import java.io.IOException;
+import java.util.EnumSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.palantir.cassandra.db.RowCountOverwhelmingException;
+
+import org.apache.cassandra.db.filter.TombstoneOverwhelmingException;
+import org.apache.cassandra.db.index.IndexNotAvailableException;
+import org.apache.cassandra.exceptions.IsBootstrappingException;
+import org.apache.cassandra.gms.Gossiper;
+
+public class MessageDeliveryTask implements Runnable
+{
+    private static final Logger logger = LoggerFactory.getLogger(MessageDeliveryTask.class);
+
+    private final MessageIn message;
+    private final int id;
+    private final long constructionTime;
+    private final boolean isCrossNodeTimestamp;
+
+    public MessageDeliveryTask(MessageIn message, int id, long timestamp, boolean isCrossNodeTimestamp)
+    {
+        assert message != null;
+        this.message = message;
+        this.id = id;
+        this.constructionTime = timestamp;
+        this.isCrossNodeTimestamp = isCrossNodeTimestamp;
+    }
+
+    public void run()
+    {
+        MessagingService.Verb verb = message.verb;
+        if (MessagingService.DROPPABLE_VERBS.contains(verb)
+            && System.currentTimeMillis() > constructionTime + message.getTimeout())
+        {
+            MessagingService.instance().incrementDroppedMessages(verb, isCrossNodeTimestamp);
+            return;
+        }
+
+        IVerbHandler verbHandler = MessagingService.instance().getVerbHandler(verb);
+        if (verbHandler == null)
+        {
+            logger.trace("Unknown verb {}", verb);
+            return;
+        }
+
+        try
+        {
+            verbHandler.doVerb(message, id);
+        }
+        catch (IOException ioe)
+        {
+            handleFailure(ioe);
+            throw new RuntimeException(ioe);
+        }
+        catch (TombstoneOverwhelmingException | RowCountOverwhelmingException | IndexNotAvailableException e)
+        {
+            handleFailure(e);
+            logger.error(e.getMessage());
+        }
+        catch (IsBootstrappingException e)
+        {
+            /*
+             * Ignore bootstrapping error messages as they spam the logs and don't offer
+             * much in the way of signal.
+             */
+            handleFailure(e);
+            if (READ_VERBS.contains(verb))
+            {
+                logger.debug("Squelching error message for verb type {} during bootstrap", verb);
+            }
+            else {
+                throw e;
+            }
+        }
+        catch (Throwable t)
+        {
+            handleFailure(t);
+            throw t;
+        }
+
+        if (GOSSIP_VERBS.contains(message.verb))
+            Gossiper.instance.setLastProcessedMessageAt(constructionTime);
+    }
+
+    private void handleFailure(Throwable t)
+    {
+        if (message.doCallbackOnFailure())
+        {
+            MessageOut response = new MessageOut(MessagingService.Verb.INTERNAL_RESPONSE)
+                                                .withParameter(MessagingService.FAILURE_RESPONSE_PARAM, MessagingService.ONE_BYTE);
+            MessagingService.instance().sendReply(response, id, message.from);
+        }
+    }
+
+    private static final EnumSet<MessagingService.Verb> GOSSIP_VERBS = EnumSet.of(MessagingService.Verb.GOSSIP_DIGEST_ACK,
+                                                                                  MessagingService.Verb.GOSSIP_DIGEST_ACK2,
+                                                                                  MessagingService.Verb.GOSSIP_DIGEST_SYN);
+    
+    private static final EnumSet<MessagingService.Verb> READ_VERBS = EnumSet.of(MessagingService.Verb.READ,
+                                                                                MessagingService.Verb.RANGE_SLICE);
+}

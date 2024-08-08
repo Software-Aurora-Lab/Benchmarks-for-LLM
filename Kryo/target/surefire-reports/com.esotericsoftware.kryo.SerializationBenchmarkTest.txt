@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.esotericsoftware.kryo.SerializationBenchmarkTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 4, Time elapsed: 1.429 s -- in com.esotericsoftware.kryo.SerializationBenchmarkTest
